@@ -5,9 +5,6 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace ImageHelper4Markdown
 {
-    /// <summary>
-    /// MainWindow.xaml の相互作用ロジック
-    /// </summary>
     public partial class MainWindow : Window
     {
         private Clipboard2Png _saver;
@@ -30,6 +27,11 @@ namespace ImageHelper4Markdown
 
         private void BtnCapture_Click(object sender, RoutedEventArgs e)
         {
+            System.Windows.Clipboard.Clear(); // Clipboard クラスを System.Windows から明示的に参照
+
+            // Windows 11 では Snipping Tool が統合され、URI スキームで直接キャプチャ開始できます
+            Process.Start("ms-screenclip:");
+
             if (_saver.IsMonitoring == false)
             {
                 _saver.StartMonitoring();

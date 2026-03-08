@@ -17,9 +17,22 @@ namespace ImageHelper4Markdown
             set => FileNameBox.Text = value;
         }
 
-        public ImageSaveInfoDialog()
+        public ImageSaveInfoDialog(Window owner)
         {
             InitializeComponent();
+
+            this.Owner = owner;
+
+            EnableNonTitleBarDrag();
+        }
+
+        private void EnableNonTitleBarDrag()
+        {
+            // キャプションバー以外でもドラッグ可能にする
+            this.MouseLeftButtonDown += (sender, e) => this.DragMove();
+
+            this.Topmost = true;
+            this.Topmost = false;
         }
 
         private void Ok_Click(object sender, RoutedEventArgs e)

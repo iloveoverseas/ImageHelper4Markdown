@@ -30,12 +30,10 @@ namespace ImageHelper4Markdown
             _ownerWindow = window;
         }
 
+        // クリップボード監視の状態を示すプロパティ
         public bool IsMonitoring { get; private set; } = false;
 
-        /// <summary>
-        /// クリップボード監視を開始します
-        /// </summary>
-        public void StartMonitoring()
+        public void StartMonitoring()           // クリップボード監視を開始
         {
             if (IsMonitoring)
             {
@@ -46,10 +44,7 @@ namespace ImageHelper4Markdown
             IsMonitoring = true;
         }
 
-        /// <summary>
-        /// クリップボード監視を停止します
-        /// </summary>
-        public void StopMonitoring()
+        public void StopMonitoring()            // クリップボード監視を停止
         {
             if (IsMonitoring == false)
             {
@@ -60,62 +55,64 @@ namespace ImageHelper4Markdown
             IsMonitoring = false;
         }
 
+        // クリップボードに画像が含まれている場合の処理中フラグ。これにより、連続でキャプチャしている場合など、処理中にさらにクリップボードが更新される可能性があるため、二重処理を防止する。
         public bool IsCatchImageInClipboard { get; set; }
 
         private IntPtr HwndHandler(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam, ref bool handled)
         {
             if (msg == WM_CLIPBOARDUPDATE)
             {
-                // 画像が含まれている場合のみ処理
-                if (Clipboard.ContainsImage())
+                if (Clipboard.ContainsImage())                  // クリップボードに画像が含まれているか確認
                 {
-                    if (IsCatchImageInClipboard == true)
+                    if (IsCatchImageInClipboard == true)        // 連続でキャプチャしている場合など、処理中にさらにクリップボードが更新される可能性があるため、二重処理を防止する
                     {
-                        return IntPtr.Zero;
+                        return IntPtr.Zero;                     // すでに処理中であれば、何もしない
                     }
 
                     IsCatchImageInClipboard = true;
 
-                    ExecuteSave();
+                    ExecuteSavePngFromClipboard();              // クリップボードからPNG保存処理を実行
 
-                    StopMonitoring();
+                    StopMonitoring();                           // 画像を保存した後は、監視を停止して二重処理を防止する
+
                     IsCatchImageInClipboard = false;
-
                 }
             }
+
             return IntPtr.Zero;
         }
 
-        private void ExecuteSave()
+        private void ExecuteSavePngFromClipboard()
         {
             try
             {
-                BitmapSource bitmap = Clipboard.GetImage();
+                BitmapSource bitmap = Clipboard.GetImage();     // クリップボードから画像を取得
                 if (bitmap == null)
                 {
                     return;
                 }
 
-                if (Directory.Exists(SaveDirectory) == false)
+                if (Directory.Exists(SaveDirectory) == false)   // 保存先ディレクトリが存在しない場合は作成
                 {
                     Directory.CreateDirectory(SaveDirectory);
                 }
 
                 // ダイアログで説明とファイル名を入力
-                var dialog = new ImageSaveInfoDialog();
-                dialog.Owner = _ownerWindow;
+                var dialog = new ImageSaveInfoDialog(_ownerWindow);
+                //dialog.Owner = _ownerWindow;
                 dialog.FileName = $"Clipboard2Png_{DateTime.Now:yyyyMMdd_HHmmss}.png";
                 if (dialog.ShowDialog() != true)
                 {
                     return;
                 }
+                dialog.Close();
 
                 string description = dialog.Description?.Trim();
                 string pngFileName = dialog.FileName?.Trim();
 
-
                 string filePath = Path.Combine(SaveDirectory, pngFileName);
 
+                // PNGファイルとして保存
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     var encoder = new PngBitmapEncoder();
@@ -127,11 +124,11 @@ namespace ImageHelper4Markdown
                 string markdown = $"![{description}]({pngFileName})";
                 Clipboard.SetText(markdown);
 
-                OnImageSaved?.Invoke(filePath);
+                OnImageSaved?.Invoke(filePath);     // 画像が保存された場合は、OnImageSavedイベントを通じて保存されたファイルパスを通知
             }
             catch (Exception ex)
             {
-                OnError?.Invoke(ex);
+                OnError?.Invoke(ex);    // エラーが発生した場合は、OnErrorイベントを通じて通知
             }
         }
     }

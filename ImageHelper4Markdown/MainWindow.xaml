@@ -31,7 +31,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="SteelBlue"/>
+                                <Setter TargetName="border" Property="Background" Value="CadetBlue"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="border" Property="Background" Value="Transparent"/>
@@ -44,7 +44,7 @@
     </Window.Resources>
 
     
-    <Border CornerRadius="200" Background="DarkSlateBlue" BorderThickness="1" BorderBrush="WhiteSmoke">
+    <Border CornerRadius="200" Background="CadetBlue" BorderThickness="1" BorderBrush="WhiteSmoke">
         <Border.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="保存フォルダ変更" Click="MenuItem1_Click"/>
