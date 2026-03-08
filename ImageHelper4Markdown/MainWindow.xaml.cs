@@ -1,42 +1,49 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using System.Windows;
+
 using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace ImageHelper4Markdown
 {
     public partial class MainWindow : Window
     {
-        private Clipboard2Png _saver;
+        private Clipboard2Png _SaveClipboardImage;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            EnableNonTitleBarDrag();
-        }
-
-        private void EnableNonTitleBarDrag()
-        {
-            // キャプションバー以外でもドラッグ可能にする
-            this.MouseLeftButtonDown += (sender, e) => this.DragMove();
+            this.MouseLeftButtonDown += (sender, e) => this.DragMove();             // キャプションバー以外でもドラッグ可能にする
 
             this.Topmost = true;
             this.Topmost = false;
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            _SaveClipboardImage = new Clipboard2Png();
+            _SaveClipboardImage.SaveFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);      // デフォルトはデスクトップ
+        }
+
         private void BtnCapture_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Clipboard.Clear(); // Clipboard クラスを System.Windows から明示的に参照
+            // Snipping Tool 起動
+            Process.Start("explorer.exe", "ms-screenclip:");
 
-            // Windows 11 では Snipping Tool が統合され、URI スキームで直接キャプチャ開始できます
-            Process.Start("ms-screenclip:");
-
-            if (_saver.IsMonitoring == false)
+            // SnippingTool.exe が起動するまで待つ
+            Process snip = null;
+            while (snip == null)
             {
-                _saver.StartMonitoring();
+                snip = Process.GetProcessesByName("SnippingTool").FirstOrDefault();
+                Thread.Sleep(50);
             }
-            Process.Start("explorer.exe", "ms-screenclip:"); // Windows 11 では Snipping Tool が統合され、URI スキームでキャプチャを直接開始できます。
+
+            snip.WaitForExit();                                     // Snipping Tool の終了を待つ
+
+            _SaveClipboardImage.Save();                             // クリップボードの画像を保尊
         }
 
         private void MenuItem1_Click(object sender, RoutedEventArgs e)
@@ -46,19 +53,13 @@ namespace ImageHelper4Markdown
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                _saver.SaveDirectory = dialog.FileName;
+                _SaveClipboardImage.SaveFolder = dialog.FileName;
             }
         }
 
         private void MenuItem2_Click(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            _saver = new Clipboard2Png(this);
-            _saver.SaveDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop); // デフォルトはデスクトップ
+            System.Windows.Application.Current.Shutdown();
         }
     }
 }

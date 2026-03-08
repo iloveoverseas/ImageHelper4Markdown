@@ -11,9 +11,7 @@
         TextElement.FontSize="14"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto"
         BorderThickness="1" ResizeMode="NoResize" WindowStyle="None"
-                AllowsTransparency="True"
-        Background="Transparent"
-
+        AllowsTransparency="True" Background="Transparent"
         Title="MainWindow" Height="100" Width="100" Loaded="Window_Loaded">
 
     <Window.Resources>
@@ -29,22 +27,13 @@
                         <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="0" CornerRadius="55">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="CadetBlue"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="Transparent"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
     </Window.Resources>
 
-    
-    <Border CornerRadius="200" Background="CadetBlue" BorderThickness="1" BorderBrush="WhiteSmoke">
+    <Border CornerRadius="200" Background="Purple" BorderThickness="1" BorderBrush="Transparent">
         <Border.ContextMenu>
             <ContextMenu>
                 <MenuItem Header="保存フォルダ変更" Click="MenuItem1_Click"/>
